@@ -25,6 +25,7 @@ model Post {
     createdById String
 
     @@index([name])
+    @@index([createdById])
 }
 
 // Necessary for Next auth
@@ -44,6 +45,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -52,6 +54,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
@@ -63,6 +67,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    Resume        Resume[]
 }
 
 model VerificationToken {
@@ -71,4 +76,41 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Resume {
+    id            String         @id @default(cuid())
+    userId        String
+    firstName     String         @default("")
+    lastName      String         @default("")
+    email         String?        @default("")
+    personalLinks PersonalLink[]
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model PersonalLink {
+    id       String           @id @default(cuid())
+    resumeId String
+    name     String
+    url      String
+    type     PersonalLinkType
+    resume   Resume           @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+    @@index([resumeId])
+}
+
+enum PersonalLinkType {
+    github
+    linkedin
+    twitter
+    facebook
+    instagram
+    youtube
+    twitch
+    website
+    discord
+    other
 }

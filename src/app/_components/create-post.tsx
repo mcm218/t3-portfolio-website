@@ -23,7 +23,6 @@ const formSchema = z.object({
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { create } from "domain";
 
 export function CreatePost() {
     const router = useRouter();
