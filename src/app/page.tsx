@@ -3,7 +3,10 @@ import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { CreateResume } from "./_components/create-resume";
+import { CreateResume as CreateResumeWizard } from "./_components/wizards/create-resume";
 import { CreatePersonalLink } from "./_components/create-personal-link";
+import { Wizard } from "./_components/wizard";
+import { Suspense } from "react";
 
 export default async function Home() {
     const session = await getServerAuthSession();
@@ -43,27 +46,47 @@ export default async function Home() {
     );
 }
 
+function WizardChild(props: WizardChildProps) {
+    return (
+        <>
+            {props.page === 0 && <div>Page 1</div>}
+            {props.page === 1 && <div>Page 2</div>}
+            {props.page === 2 && <div>Page 3</div>}
+        </>
+    );
+}
+
 async function CrudShowcase() {
     const session = await getServerAuthSession();
     if (!session?.user) return null;
 
     const resumes = await api.resume.getMyResumes.query();
-
     return (
-        <div className="w-full max-w-xs">
-            <h2 className="text-2xl font-bold">Your resumes</h2>
-            {resumes.length === 0 ? (
-                <p>You have no resumes yet.</p>
-            ) : (
-                <ul className="flex flex-col gap-2">
-                    {resumes.map((resume) => (
-                        <li key={resume.id}>{JSON.stringify(resume)}</li>
-                    ))}
-                </ul>
-            )}
+        <div className="w-full flex flex-col align-middle">
+            <Suspense fallback={<div>Loading...</div>}>
+                <CreateResumeWizard />
+            </Suspense>
 
-            <CreateResume />
-            {resumes.length > 0 && <CreatePersonalLink resumes={resumes} />}
+            {/* <div
+                className="flex flex-col gap-4 p-4 rounded-lg bg-white/10"
+                style={{
+                    maxWidth: "40rem",
+                }}
+            >
+                <h2 className="text-2xl font-bold text-center">Your resumes</h2>
+                {resumes.length === 0 ? (
+                    <p className="text-center">You have no resumes yet.</p>
+                ) : (
+                    <ul className="flex flex-col gap-2">
+                        {resumes.map((resume) => (
+                            <li key={resume.id}>{resume.id}</li>
+                        ))}
+                    </ul>
+                )}
+            </div> */}
+
+            {/* <CreateResume /> */}
+            {/* {resumes.length > 0 && <CreatePersonalLink resumes={resumes} />} */}
         </div>
     );
 }

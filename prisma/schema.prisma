@@ -86,7 +86,8 @@ model Resume {
     email         String?        @default("")
     personalLinks PersonalLink[]
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Section Section[]
 
     @@index([userId])
 }
@@ -94,7 +95,7 @@ model Resume {
 model PersonalLink {
     id       String           @id @default(cuid())
     resumeId String
-    name     String
+    label    String
     url      String
     type     PersonalLinkType
     resume   Resume           @relation(fields: [resumeId], references: [id], onDelete: Cascade)
@@ -113,4 +114,32 @@ enum PersonalLinkType {
     website
     discord
     other
+}
+
+model Section {
+    id       String        @id @default(cuid())
+    resumeId String
+    title    String        @default("")
+    order    Int
+    items    SectionItem[]
+    start    DateTime?
+    end      DateTime?
+    company  String?
+
+    resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+    @@index([resumeId])
+}
+
+model SectionItem {
+    id             String    @id @default(cuid())
+    sectionId      String
+    description    String    @default("")
+    rawDescription String    @default("")
+    order          Int
+    date           DateTime?
+
+    section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+    @@index([sectionId])
 }

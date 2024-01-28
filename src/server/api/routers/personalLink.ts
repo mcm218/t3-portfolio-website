@@ -34,6 +34,34 @@ export const personalLinkRouter = createTRPCRouter({
             });
         }),
 
+    createMany: protectedProcedure
+        .input(
+            z.array(
+                z.object({
+                    resumeId: z.string().min(1),
+                    label: z.string().min(1),
+                    url: z.string().url().min(1),
+                    type: z.enum([
+                        "github",
+                        "linkedin",
+                        "twitter",
+                        "facebook",
+                        "instagram",
+                        "youtube",
+                        "twitch",
+                        "website",
+                        "discord",
+                        "other",
+                    ]),
+                }),
+            ),
+        )
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.personalLink.createMany({
+                data: input,
+            });
+        }),
+
     getLinksFor: protectedProcedure
         .input(
             z.object({

@@ -1,5 +1,8 @@
 import { postRouter } from "~/server/api/routers/post";
-import { resumeRouter } from "~/server/api/routers/resume";
+import {
+    resumeRouter,
+    resumeAdminRefineRouter,
+} from "~/server/api/routers/resume";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { personalLinkRouter } from "./routers/personalLink";
 
@@ -12,6 +15,7 @@ export const appRouter = createTRPCRouter({
     post: postRouter,
     resume: resumeRouter,
     personalLink: personalLinkRouter,
+    resumeAdmin: resumeAdminRefineRouter,
 });
 
 // export type definition of API

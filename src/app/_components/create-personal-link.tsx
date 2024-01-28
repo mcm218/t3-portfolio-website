@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -45,8 +44,9 @@ const formSchema = z.object({
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import type { PersonalLink } from "@prisma/client";
 
-interface Props {
+interface ForExistingResumesProp {
     resumes: Resume[];
 }
 
@@ -54,8 +54,10 @@ interface Resume {
     id: string;
 }
 
-export function CreatePersonalLink({ resumes = [] }: Props) {
+export function CreatePersonalLink(props: ForExistingResumesProp) {
     const router = useRouter();
+
+    const resumes = "resumes" in props ? props.resumes : [];
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -68,24 +70,26 @@ export function CreatePersonalLink({ resumes = [] }: Props) {
     });
 
     const createPersonalLink = api.personalLink.create.useMutation({
-        onSuccess: () => {
-            form.setValue("name", "");
-            form.setValue("url", "");
-            form.setValue("resumeId", "");
-            form.setValue("type", "other");
-            router.refresh();
-        },
+        onSuccess: clearAndRefreshRouter,
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    function submitForm(values: z.infer<typeof formSchema>) {
         console.log(values);
         createPersonalLink.mutate(values);
+    }
+
+    function clearAndRefreshRouter() {
+        form.setValue("name", "");
+        form.setValue("url", "");
+        form.setValue("resumeId", "");
+        form.setValue("type", "other");
+        router.refresh();
     }
 
     return (
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(submitForm)}
                 className="flex flex-col gap-2"
             >
                 <FormField
@@ -170,36 +174,38 @@ export function CreatePersonalLink({ resumes = [] }: Props) {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="resumeId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Resume</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a resume" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {resumes.map((resume) => (
-                                        <SelectItem
-                                            key={resume.id}
-                                            value={resume.id}
-                                        >
-                                            {resume.id}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                {resumes && resumes.length > 0 && (
+                    <FormField
+                        control={form.control}
+                        name="resumeId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Resume</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a resume" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {resumes.map((resume) => (
+                                            <SelectItem
+                                                key={resume.id}
+                                                value={resume.id}
+                                            >
+                                                {resume.id}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
 
                 <Button
                     type="submit"

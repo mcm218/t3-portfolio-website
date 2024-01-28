@@ -4,7 +4,12 @@
  */
 await import("./src/env.js");
 
+import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    sentry: {},
+};
 
-export default config;
+export default withSentryConfig(config);
+
+// Injected content via Sentry wizard below
